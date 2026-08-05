@@ -37,14 +37,14 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.0.0")
+    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.1.0")
 ]
 ```
 
 ### CocoaPods
 
 ```ruby
-pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.0.0'
+pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.1.0'
 ```
 
 Local path (as used by `ios_example` / `flutter_example`):
@@ -182,6 +182,9 @@ MIT License — see the [LICENSE](https://github.com/Tareq-Ghassan/FaceDetection
 - Umbrella: [FaceDetection-GazePoint](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/issues)
 
 ## Version History
+
+### 2.1.0 (2026-08-05)
+- Version bump aligned with multi-platform release
 
 ### 2.0.0 (2026-07-29)
 - Initial release with Vision framework
