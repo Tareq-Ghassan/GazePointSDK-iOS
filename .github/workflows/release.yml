@@ -16,8 +16,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: swift build
-        run: swift build
+      - name: Build for iOS
+        run: |
+          xcodebuild -scheme GazePointSDK \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
