@@ -47,10 +47,10 @@ dependencies: [
 pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.1.0'
 ```
 
-Local path (as used by `ios_example` / `flutter_example`):
+Local path (as used by `Example/`):
 
 ```ruby
-pod 'GazePointSDK', :path => '../ios'
+pod 'GazePointSDK', :path => '.'
 ```
 
 ## Quick Start
@@ -148,7 +148,7 @@ print("Dropped Frames: \(metrics.droppedFrames)")
 
 ## Sample app
 
-Open [`ios_example`](../ios_example) in Xcode. It consumes this package via a local Swift Package dependency.
+Open [`Example`](Example/) in Xcode (`Example/ios_example.xcodeproj`). It consumes this package via a local Swift Package dependency.
 
 ## API Reference
 
