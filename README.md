@@ -37,14 +37,14 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.1.0")
+    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.1.1")
 ]
 ```
 
 ### CocoaPods
 
 ```ruby
-pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.1.0'
+pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.1.1'
 ```
 
 Local path (as used by `Example/`):
@@ -148,7 +148,7 @@ print("Dropped Frames: \(metrics.droppedFrames)")
 
 ## Sample app
 
-Open [`Example`](Example/) in Xcode (`Example/ios_example.xcodeproj`). It consumes this package via a local Swift Package dependency.
+Open [`Example`](Example/) in Xcode (`Example/ios_example.xcodeproj`). It consumes this package via a local Swift Package dependency. Run on a **physical iPhone** (camera). Pass: preview, moving gaze indicator, confidence > 0, blink. See [TESTING.md](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/blob/main/TESTING.md).
 
 ## API Reference
 
