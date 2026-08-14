@@ -3,6 +3,7 @@ name: Release iOS SDK
 # Tag this repo to publish. Other SDKs are not involved.
 #   git tag 2.1.1 && git push origin 2.1.1
 # SPM: https://github.com/Tareq-Ghassan/GazePointSDK-iOS
+# GitHub Release needs contents: write. A tag alone does not update sidebar Latest.
 
 on:
   push:
@@ -11,6 +12,17 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
+  github-release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
   validate:
     name: Build Swift package
     runs-on: macos-latest
@@ -22,7 +34,3 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true
