@@ -40,14 +40,14 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.2.0")
+    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.2.1")
 ]
 ```
 
 ### CocoaPods
 
 ```ruby
-pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.2.0'
+pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.2.1'
 ```
 
 Local path (as used by `Example/`):
@@ -211,6 +211,9 @@ MIT License — see the [LICENSE](https://github.com/Tareq-Ghassan/FaceDetection
 - Umbrella: [FaceDetection-GazePoint](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/issues)
 
 ## Version History
+
+### 2.2.1 (2026-08-14)
+- `GazeCamera.create()` hops to the main actor so Flutter (and other nonisolated callers) can construct the camera under Swift 6
 
 ### 2.2.0 (2026-08-13)
 - `GazeCamera` + `GazePreviewView` owned by the SDK
