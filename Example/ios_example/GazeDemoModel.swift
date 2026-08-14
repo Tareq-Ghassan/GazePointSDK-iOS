@@ -1,6 +1,7 @@
 import AVFoundation
 import GazePointSDK
 import SwiftUI
+import UIKit
 
 @MainActor
 @Observable
@@ -15,22 +16,25 @@ final class GazeDemoModel {
     var roll: Float = 0
     var faceDetected = false
 
-    let session = AVCaptureSession()
-
-    private let sessionQueue = DispatchQueue(label: "com.gazepoint.ios-example.camera")
-    private let videoOutput = AVCaptureVideoDataOutput()
-    private var frameProcessor: FrameProcessor?
+    let camera = GazeCamera()
 
     func start() {
+        camera.options = GazeCameraOptions(previewEnabled: true, showFaceBoxes: true)
+        camera.onFrame = { [weak self] frame in
+            Task { @MainActor in
+                self?.apply(frame)
+            }
+        }
+
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            configureSession()
+            camera.start()
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                Task { @MainActor in
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
                     if granted {
-                        self.configureSession()
+                        self.camera.start()
                     } else {
                         self.permissionDenied = true
                         self.statusText = "Camera permission denied"
@@ -44,107 +48,31 @@ final class GazeDemoModel {
     }
 
     func stop() {
-        sessionQueue.async { [session] in
-            if session.isRunning {
-                session.stopRunning()
-            }
-        }
+        camera.stop()
     }
 
-    private func configureSession() {
-        let processor = FrameProcessor { [weak self] result in
-            Task { @MainActor in
-                self?.apply(result)
-            }
+    private func apply(_ frame: GazeFrame) {
+        statusText = frame.statusText
+        faceDetected = frame.faceDetected
+        if let gaze = frame.gaze {
+            gazePoint = gaze.gazePoint
+            confidence = gaze.confidence
+            isBlinking = gaze.isBlinking
+            pitch = gaze.headPose.pitch
+            yaw = gaze.headPose.yaw
+            roll = gaze.headPose.roll
+        } else {
+            gazePoint = nil
         }
-        frameProcessor = processor
-
-        sessionQueue.async { [session, videoOutput] in
-            session.beginConfiguration()
-            session.sessionPreset = .high
-
-            session.inputs.forEach { session.removeInput($0) }
-            session.outputs.forEach { session.removeOutput($0) }
-
-            guard
-                let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
-                let input = try? AVCaptureDeviceInput(device: camera),
-                session.canAddInput(input)
-            else {
-                Task { @MainActor in
-                    self.statusText = "Front camera unavailable"
-                }
-                session.commitConfiguration()
-                return
-            }
-
-            session.addInput(input)
-
-            videoOutput.alwaysDiscardsLateVideoFrames = true
-            videoOutput.videoSettings = [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-            ]
-
-            guard session.canAddOutput(videoOutput) else {
-                session.commitConfiguration()
-                return
-            }
-
-            session.addOutput(videoOutput)
-            videoOutput.setSampleBufferDelegate(processor, queue: DispatchQueue(label: "com.gazepoint.ios-example.frames"))
-
-            if let connection = videoOutput.connection(with: .video) {
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
-                }
-                if connection.isVideoMirroringSupported {
-                    connection.isVideoMirrored = true
-                }
-            }
-
-            session.commitConfiguration()
-            session.startRunning()
-
-            Task { @MainActor in
-                self.statusText = "Look at the screen — tracking…"
-            }
-        }
-    }
-
-    private func apply(_ result: GazeTracker.GazeResult?) {
-        guard let result else {
-            faceDetected = false
-            statusText = "No face detected"
-            return
-        }
-
-        faceDetected = true
-        gazePoint = result.gazePoint
-        confidence = result.confidence
-        isBlinking = result.isBlinking
-        pitch = result.headPose.pitch
-        yaw = result.headPose.yaw
-        roll = result.headPose.roll
-        statusText = isBlinking ? "Blink detected" : "Tracking"
     }
 }
 
-/// Runs off the main actor so camera callbacks stay non-blocking.
-nonisolated final class FrameProcessor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
-    private let tracker = GazeTracker()
-    private let onResult: @Sendable (GazeTracker.GazeResult?) -> Void
+struct SDKPreviewView: UIViewRepresentable {
+    let preview: GazePreviewView
 
-    init(onResult: @escaping @Sendable (GazeTracker.GazeResult?) -> Void) {
-        self.onResult = onResult
+    func makeUIView(context: Context) -> GazePreviewView {
+        preview
     }
 
-    func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let result = tracker.calculateGazePoint(from: pixelBuffer, orientation: .leftMirrored)
-        onResult(result)
-    }
+    func updateUIView(_ uiView: GazePreviewView, context: Context) {}
 }

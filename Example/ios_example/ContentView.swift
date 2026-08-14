@@ -1,4 +1,5 @@
 import SwiftUI
+import GazePointSDK
 
 struct ContentView: View {
     @State private var model = GazeDemoModel()
@@ -6,7 +7,7 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                CameraPreviewView(session: model.session)
+                SDKPreviewView(preview: model.camera.previewView)
                     .ignoresSafeArea()
 
                 // Gaze indicator in screen coordinates from GazePointSDK
@@ -23,6 +24,20 @@ struct ContentView: View {
                 }
 
                 VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            model.camera.switchCamera()
+                        } label: {
+                            Image(systemName: "camera.rotate")
+                                .font(.title2)
+                                .padding(10)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .accessibilityLabel("Flip camera")
+                    }
+                    .padding()
+
                     Spacer()
 
                     statusPanel
@@ -50,11 +65,11 @@ struct ContentView: View {
                 .font(.subheadline)
                 .foregroundStyle(model.faceDetected ? .green : .yellow)
 
-            if model.faceDetected {
+            if let point = model.gazePoint {
                 Text(String(
                     format: "Gaze: (%.0f, %.0f)  Confidence: %.0f%%",
-                    model.gazePoint?.x ?? 0,
-                    model.gazePoint?.y ?? 0,
+                    point.x,
+                    point.y,
                     model.confidence * 100
                 ))
                 .font(.caption.monospaced())
@@ -69,8 +84,12 @@ struct ContentView: View {
 
                 Text(model.isBlinking ? "Eyes: blinking" : "Eyes: open")
                     .font(.caption)
+            } else if model.faceDetected {
+                Text("Gaze is only calculated when one face is in frame.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             } else {
-                Text("Point the front camera at your face.")
+                Text("Point the camera at your face.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

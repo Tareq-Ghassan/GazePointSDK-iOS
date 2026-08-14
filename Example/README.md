@@ -1,32 +1,27 @@
 # GazePoint SDK — iOS Example
 
-SwiftUI demo that lives in this repository and links the local `GazePointSDK` Swift package.
+SwiftUI demo that lives in this repository and compiles against the local `GazePointSDK` package.
 
 ```
 GazePointSDK-iOS/
-├── Package.swift
-├── Sources/GazePointSDK/
-└── Example/                 # this app
-    ├── ios_example/
-    └── ios_example.xcodeproj
+├── Sources/GazePointSDK/   # library
+└── Example/                # this app
 ```
-
-## Open in Xcode
-
-1. Open `Example/ios_example.xcodeproj`
-2. Confirm the local `GazePointSDK` package resolves (path `..`)
-3. Run on a **physical iPhone** (camera required)
 
 ## What it shows
 
-- Live front-camera preview
-- Gaze indicator from `GazeTracker`
-- Confidence / blink / head-pose status
+- Live camera preview from the SDK (`GazePreviewView`)
+- White outline on every detected face, aligned to the face
+- Status **Multiple faces detected** when more than one face is in frame (gaze is not calculated in that case)
+- **Flip camera** button (front / back)
+- Gaze indicator, confidence, blink, and head pose from `GazeCamera`
 
-## Requirements
+Metrics-only apps can use `GazeCamera` with `previewEnabled = false` and never add `previewView`.
 
-- iOS 16.0+
-- Xcode with Swift 6
-- Camera permission (`NSCameraUsageDescription`)
+## Run
 
-Releasing the iOS SDK does **not** require changes in Flutter or other platform repos. Tag this repository and consume it via Swift Package Manager.
+1. Open `Example/ios_example.xcodeproj` in Xcode
+2. Select a **physical iPhone** (camera)
+3. Run
+
+See [TESTING.md](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/blob/main/TESTING.md).

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'GazePointSDK'
-  s.version          = '2.1.0'
+  s.version          = '2.2.0'
   s.summary          = 'GazePoint SDK for iOS — eye tracking and gaze point detection'
   s.description      = <<-DESC
     Native iOS GazePoint SDK using Vision face landmarks for gaze estimation.

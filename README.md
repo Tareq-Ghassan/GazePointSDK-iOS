@@ -7,7 +7,10 @@ Advanced eye tracking and gaze point detection SDK for iOS applications using Ap
 
 ## Features
 
-- ✅ **Real-time Gaze Tracking** — Track the user's gaze point on screen in real time
+- ✅ **Live camera preview** — Opt-in `GazePreviewView` (disable for metrics-only apps)
+- ✅ **Face bounding boxes** — White outline on every detected face (aligned to the preview)
+- ✅ **Multi-face status** — `GazeFrame.statusText` is `"Multiple faces detected"` when more than one face is in frame; `frame.gaze` is `nil` until only one face remains
+- ✅ **Real-time Gaze Tracking** — Track the user's gaze point on screen in real time (single face only)
 - ✅ **Head Pose Compensation** — Accurate tracking regardless of head position
 - ✅ **Blink Detection** — Detect blinks using Eye Aspect Ratio (EAR)
 - ✅ **Kalman Filtering** — Smooth gaze point tracking
@@ -37,14 +40,14 @@ Or in `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.1.1")
+    .package(url: "https://github.com/Tareq-Ghassan/GazePointSDK-iOS", from: "2.2.0")
 ]
 ```
 
 ### CocoaPods
 
 ```ruby
-pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.1.1'
+pod 'GazePointSDK', :git => 'https://github.com/Tareq-Ghassan/GazePointSDK-iOS.git', :tag => '2.2.0'
 ```
 
 Local path (as used by `Example/`):
@@ -64,7 +67,26 @@ Add to your `Info.plist`:
 <string>We need camera access for eye tracking</string>
 ```
 
-### 2. Basic Usage
+### 2. Camera + preview (recommended)
+
+```swift
+import GazePointSDK
+import UIKit
+
+let camera = GazeCamera()
+camera.options = GazeCameraOptions(previewEnabled: true, showFaceBoxes: true)
+camera.onFrame = { frame in
+    // frame.statusText — "No face detected" | "Multiple faces detected" | "Blink detected" | "Tracking"
+    // frame.gaze is nil unless exactly one face is in frame
+    // White boxes are drawn on camera.previewView
+}
+view.addSubview(camera.previewView)
+camera.start()
+
+// Metrics only: GazeCameraOptions(previewEnabled: false) and skip adding previewView
+```
+
+### 3. Gaze math only (you already have a camera frame)
 
 ```swift
 import GazePointSDK
@@ -123,7 +145,7 @@ extension GazeTrackingViewController: AVCaptureVideoDataOutputSampleBufferDelega
 }
 ```
 
-### 3. With Calibration
+### 4. With Calibration
 
 ```swift
 let calibrationPoints = [
@@ -137,7 +159,7 @@ let calibrationPoints = [
 gazeTracker.calibrate(calibrationPoints: calibrationPoints)
 ```
 
-### 4. Performance Monitoring
+### 5. Performance Monitoring
 
 ```swift
 let metrics = gazeTracker.getPerformanceMetrics()
@@ -148,9 +170,16 @@ print("Dropped Frames: \(metrics.droppedFrames)")
 
 ## Sample app
 
-Open [`Example`](Example/) in Xcode (`Example/ios_example.xcodeproj`). It consumes this package via a local Swift Package dependency. Run on a **physical iPhone** (camera). Pass: preview, moving gaze indicator, confidence > 0, blink. See [TESTING.md](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/blob/main/TESTING.md).
+Open [`Example`](Example/) in Xcode (`Example/ios_example.xcodeproj`). It consumes this package via a local Swift Package dependency. Run on a **physical iPhone** (camera). Pass: preview, white face boxes on the faces, **Multiple faces detected** with two people in frame and **no gaze point**, moving gaze indicator with one face, confidence > 0, blink. See [TESTING.md](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/blob/main/TESTING.md).
 
 ## API Reference
+
+### GazeCamera
+
+- `previewView: GazePreviewView` — live camera + white face boxes
+- `options: GazeCameraOptions` — `previewEnabled`, `showFaceBoxes`
+- `onFrame: ((GazeFrame) -> Void)?` — gaze (nil unless `faceCount == 1`), `faceCount`, `statusText`
+- `start()` / `stop()` / `switchCamera()`
 
 ### GazeTracker
 
@@ -182,6 +211,13 @@ MIT License — see the [LICENSE](https://github.com/Tareq-Ghassan/FaceDetection
 - Umbrella: [FaceDetection-GazePoint](https://github.com/Tareq-Ghassan/FaceDetection-GazePoint/issues)
 
 ## Version History
+
+### 2.2.0 (2026-08-13)
+- `GazeCamera` + `GazePreviewView` owned by the SDK
+- Opt-in live preview (`previewEnabled`) and white boxes on every face (`showFaceBoxes`)
+- `GazeFrame.statusText`: `"No face detected"` | `"Multiple faces detected"` | `"Blink detected"` | `"Tracking"`
+- Face boxes map through preview aspect-fill and sit on the face
+- Gaze uses pupil position + head pose (degrees); `gaze` is nil when more than one face is in frame
 
 ### 2.1.0 (2026-08-05)
 - Version bump aligned with multi-platform release
